@@ -147,3 +147,5 @@ def get_temperature_stats(start=None, end=None):
 
 if __name__ == "__main__":
     app.run(debug=False)
+    
+session.close()
