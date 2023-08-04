@@ -49,6 +49,8 @@ def index():
 
 @app.route('/api/v1.0/precipitation')
 def get_precipitition():
+    # Create our session (link) from Python to the DB
+    session= Session(engine)
     # Get the most recent date from the 'Measurement' table in the database
     most_recent_date = session.query(func.max(measurement.date)).scalar()
 
@@ -60,6 +62,8 @@ def get_precipitition():
 
     # Query precipitation data from the database for the last year
     results = session.query(measurement.date, measurement.prcp).filter(measurement.date >= one_year_ago).all()
+    
+    session.close()
 
     # Convert the query results into a dictionary with date as key and precipitation as value
     precipitation_data = {date: prcp for date, prcp in results}
@@ -80,6 +84,8 @@ def get_stations():
 
 @app.route('/api/v1.0/tobs')
 def get_most_active_station_data():
+    # Create our session (link) from Python to the DB
+    session= Session(engine)
     # Query the most active station along with the count of its occurrences in the 'Measurement' table
     most_active_station = session.query(
         measurement.station,
@@ -104,6 +110,8 @@ def get_most_active_station_data():
         measurement.date <= most_recent_date
     ).all()
     
+    session.close()
+    
     # Extract the temperature observations from the query results and store them in a list
     most_active_station_data = [row.tobs for row in results]
 
@@ -113,6 +121,8 @@ def get_most_active_station_data():
 @app.route('/api/v1.0/<start>')
 @app.route('/api/v1.0/<start>/<end>')
 def get_temperature_stats(start=None, end=None):
+    # Create our session (link) from Python to the DB
+    session= Session(engine)
     
     # Convert the date strings to datetime objects
     start_date = dt.datetime.strptime(start, '%Y-%m-%d').date()
@@ -136,6 +146,8 @@ def get_temperature_stats(start=None, end=None):
         ).filter(
             measurement.date >= start_date
         ).all()
+    
+    session.close()
 
     # Convert the results to a list of dictionaries
     temperature_data = [
